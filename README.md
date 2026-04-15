@@ -27,10 +27,11 @@
 
 ### 1. Configure the Environment Variables
 
-Create a file named `.env` in the root directory and add your Google API key:
+Create a file named `.env` in the root directory and add your Google API key and MongoDB URL:
 
 ```ini
 GOOGLE_API_KEY="your-google-api-key-here"
+MONGODB_URL="your-mongodb-url-here"
 ```
 
 ### 2. Create Virtual Environment & Install Dependencies
