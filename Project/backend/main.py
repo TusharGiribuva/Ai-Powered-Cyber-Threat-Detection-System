@@ -3,9 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Request
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 import os
 
-from routes import analyze, chat
+from routes import analyze, chat, monitor, auth
+from core.dependencies import get_current_user
 
 app = FastAPI(title="Cyber AI System")
 
@@ -30,14 +32,28 @@ STATIC_DIR = os.path.join(BASE_DIR, "static")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 templates = Jinja2Templates(directory=TEMPLATES_DIR)# Register routes
+app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(analyze.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
+app.include_router(monitor.router, prefix="/api/monitor")
 
 
 @app.get("/api/health")
 def health():
     return {"status": "ok"}
 
+@app.get("/login")
+def login_page(request: Request):
+    return templates.TemplateResponse(request=request, name="login.html")
+
+@app.get("/register")
+def register_page(request: Request):
+    return templates.TemplateResponse(request=request, name="register.html")
+
 @app.get("/")
 def home(request: Request):
     return templates.TemplateResponse(request=request, name="index.html")
+
+@app.get("/threat-monitor")
+def threat_monitor(request: Request):
+    return templates.TemplateResponse(request=request, name="threat_monitor.html")

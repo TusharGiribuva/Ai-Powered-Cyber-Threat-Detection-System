@@ -1,7 +1,7 @@
 /**
  * Sentinel AI dashboard — talks to Flask /api/analyze
  */
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "";
 
 const $ = (id) => document.getElementById(id);
 
@@ -25,7 +25,7 @@ async function checkHealth() {
   pill.dataset.state = "checking";
   pill.textContent = "API: checking…";
   try {
-    const r = await fetch(`${API_BASE}/api/health`, { method: "GET" });
+    const r = await authFetch(`${API_BASE}/api/health`, { method: "GET" });
     if (!r.ok) throw new Error(String(r.status));
     pill.dataset.state = "ok";
     pill.textContent = "API: connected";
@@ -141,7 +141,7 @@ async function runAnalyze() {
     return;
   }
   try {
-    const r = await fetch(`${API_BASE}/api/analyze`, {
+    const r = await authFetch(`${API_BASE}/api/analyze`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text, type }),
@@ -181,76 +181,4 @@ document.addEventListener("DOMContentLoaded", () => {
   setInterval(checkHealth, 15000);
 });
 
-// Chatbot Logic
-const chatToggle = $("chatbotToggle");
-const chatPanel = $("chatbotPanel");
-const chatClose = $("chatbotClose");
-const chatInput = $("chatbotInput");
-const chatSend = $("chatbotSend");
-const chatMessages = $("chatbotMessages");
-
-chatToggle.addEventListener("click", () => {
-  chatPanel.hidden = !chatPanel.hidden;
-  if (!chatPanel.hidden) {
-    chatInput.focus();
-  }
-});
-
-chatClose.addEventListener("click", () => {
-  chatPanel.hidden = true;
-});
-
-function appendMessage(text, sender) {
-  const bubble = document.createElement("div");
-  bubble.className = `chat-bubble ${sender}`;
-  bubble.textContent = text;
-  chatMessages.appendChild(bubble);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-  return bubble;
-}
-
-async function sendChatMessage() {
-  const text = chatInput.value.trim();
-  if (!text) return;
-
-  appendMessage(text, "user");
-  chatInput.value = "";
-  chatInput.disabled = true;
-  chatSend.disabled = true;
-
-  const loadingBubble = appendMessage("Typing...", "ai loading");
-
-  try {
-    const r = await fetch(`${API_BASE}/api/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text }),
-    });
-    
-    if (!r.ok) throw new Error("API error");
-    
-    const data = await r.json();
-    loadingBubble.remove();
-    
-    if (data.success && data.response) {
-      appendMessage(data.response, "ai");
-    } else {
-      throw new Error(data.error || "Invalid response");
-    }
-  } catch (e) {
-    loadingBubble.remove();
-    appendMessage("Error: Could not connect to AI. Please try again.", "ai");
-  } finally {
-    chatInput.disabled = false;
-    chatSend.disabled = false;
-    chatInput.focus();
-  }
-}
-
-chatSend.addEventListener("click", sendChatMessage);
-chatInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    sendChatMessage();
-  }
-});
+// Chatbot logic has been migrated securely to /static/js/chat_widget.js

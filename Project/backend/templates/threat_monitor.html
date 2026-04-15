@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentinel-X: AI Network Monitor</title>
+  <link rel="stylesheet" href="/static/css/monitor_styles.css">
+  <link rel="stylesheet" href="/static/css/chat_widget.css?v=2">
+  <!-- Plotly.js -->
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+</head>
+<body>
+  <header class="top-bar">
+    <div class="brand">
+      <span class="brand-icon" aria-hidden="true">◈</span>
+      <div>
+        <h1>Sentinel AI</h1>
+        <p class="tagline">Cyber threat detection &amp; explainable scoring</p>
+      </div>
+    </div>
+    <div style="display: flex; gap: 1rem; margin-left: auto;">
+      <a href="/" class="btn-home">← Back to Analyze</a>
+      <button id="btnLogout" class="btn-home" style="border-color: #ef4444; color: #ef4444; cursor: pointer;">Logout</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="header-section" style="margin-bottom: 2rem;">
+      <h1><span class="pulse-ring paused" id="statusPulse"></span> Sentinel-X: AI Network Monitor</h1>
+      <p style="color: #94a3b8; font-size: 1.1rem; margin-top: -10px;">Real-time intrusion detection and autonomous firewall defense.</p>
+    </div>
+
+    <div class="grid-layout">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <h2 style="font-size: 1.2rem;">⚙️ Control Panel</h2>
+        
+        <div class="sidebar-controls">
+          <div class="sidebar-section">
+            <button id="btnToggle" class="btn">▶️ Start Monitoring</button>
+          </div>
+
+          <div class="sidebar-section">
+            <h3 style="font-size: 1rem; margin-bottom: 0.5rem; color: #e2e8f0; background: none; -webkit-text-fill-color: inherit;">View Mode</h3>
+            <div class="radio-group" id="viewModeGroup">
+              <label><input type="radio" name="viewMode" value="Ordinary User View" checked> Ordinary User View</label>
+              <label><input type="radio" name="viewMode" value="Technician View"> Technician View</label>
+            </div>
+          </div>
+
+          <div class="sidebar-section">
+            <h3 style="font-size: 1rem; margin-bottom: 0.5rem; color: #e2e8f0; background: none; -webkit-text-fill-color: inherit;">Model Configuration</h3>
+            <label style="color:#94a3b8; font-size:0.85rem; display:block; margin-bottom:0.3rem;">AI Architecture</label>
+            <select style="width: 100%; padding: 0.5rem; background: rgba(30,41,59,0.5); color:white; border: 1px solid rgba(255,255,255,0.1); border-radius:4px; margin-bottom: 1rem;">
+              <option>Hybrid CNN + LSTM</option>
+              <option>LSTM Only</option>
+              <option>CNN Only</option>
+            </select>
+          </div>
+
+          <div class="sidebar-section" style="border: none;">
+            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 1rem; border-radius: 8px;">
+              <div style="color:#64748b; font-size:0.85rem;">System Health</div>
+              <div style="color:#10b981; font-weight:600;">OPTIMAL</div>
+            </div>
+            <div class="status-badge" style="width: 100%; box-sizing: border-box; text-align: center;">Model status: Loaded</div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main class="main-content">
+        <!-- ORDINARY USER VIEW -->
+        <div id="viewOrdinary">
+          <div id="ordinaryAlert">
+            <!-- Alert populated by JS -->
+          </div>
+
+          <div class="grid-metrics cols-3">
+            <div class="metric-card">
+              <div class="metric-label">Connection Monitored</div>
+              <div class="metric-value" id="ordTotalPkts">0</div>
+            </div>
+            <div class="metric-card" id="ordHackersCard">
+              <div class="metric-label">Hackers Blocked Today</div>
+              <div class="safe-text" id="ordBlocked">0 Unique</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">AI Certainty</div>
+              <div class="metric-value" style="color: #a78bfa;" id="ordCertainty">100%</div>
+            </div>
+          </div>
+
+          <div class="panel-card" style="margin-top: 2rem;">
+            <h3>🛡️ Active Countermeasures</h3>
+            <div id="ordFirewallState">
+              <p style="color: #10b981;">The firewall is standing by. All connected computers are trusted.</p>
+            </div>
+            <button id="btnResetFirewallOrd" class="btn btn-outline" style="margin-top: 1rem; width: auto; display: none;">Reset Firewall (Allow All)</button>
+          </div>
+
+          <div class="panel-card" style="margin-top: 2rem;">
+            <h3>💬 AI Activity Log</h3>
+            <p style="color: #94a3b8; font-size: 0.9rem;">A plain-English explanation of recent network events.</p>
+            <div class="timeline" id="ordTimeline">
+              <!-- Logs populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- TECHNICIAN VIEW -->
+        <div id="viewTechnician" style="display: none;">
+          <div class="grid-metrics cols-4">
+            <div class="metric-card">
+              <div class="metric-label">TOTAL PACKETS (1H)</div>
+              <div class="metric-value" id="techTotalPkts">0</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">THREAT LEVEL</div>
+              <div class="safe-text" id="techThreatLevel">0%</div>
+            </div>
+            <div class="metric-card" id="techActiveThreatsCard">
+              <div class="metric-label">ACTIVE THREATS</div>
+              <div class="safe-text" id="techActiveThreats">0</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">ML CONFIDENCE</div>
+              <div class="metric-value" style="color: #a78bfa;" id="techCertainty">100%</div>
+            </div>
+          </div>
+
+          <div class="panel-card" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+            <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem;">🔥 Simulated iptables Blocklist</h3>
+            <div class="firewall-box">
+              <code class="bash-block" id="techFirewallCode"># No active layer 3 blocking rules</code>
+              <button id="btnResetFirewallTech" class="btn btn-danger" style="width: auto; flex-shrink: 0;">Flush Rules</button>
+            </div>
+          </div>
+
+          <div class="chart-row">
+            <div class="panel-card">
+              <h3 style="font-size: 1.1rem;">Traffic Distribution & Anomaly Mapping</h3>
+              <div id="areaChart" class="chart-container"></div>
+            </div>
+            <div class="panel-card">
+              <h3 style="font-size: 1.1rem;">Recent Alerts</h3>
+              <table class="native-table">
+                <thead>
+                  <tr><th>Time</th><th>Source IP</th><th>Type</th><th>Conf.</th></tr>
+                </thead>
+                <tbody id="techTableBody">
+                  <!-- Rows populated by JS -->
+                </tbody>
+              </table>
+              <div id="techTableEmpty" style="padding: 1rem 0; color: #10b981; font-weight: 500; display:none;">No anomalies detected recently.</div>
+            </div>
+          </div>
+
+          <div class="chart-row">
+            <div class="panel-card">
+              <h3 style="font-size: 1.1rem;">Attack Type Vectors</h3>
+              <div id="pieChart" class="chart-container" style="min-height: 200px;"></div>
+            </div>
+            <div class="panel-card">
+              <h3 style="font-size: 1.1rem;">Targeted Ports</h3>
+              <div id="barChart" class="chart-container" style="min-height: 200px;"></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="/static/js/auth_state.js?v=3"></script>
+  <script src="/static/js/monitor_app.js?v=3"></script>
+  <script src="/static/js/chat_widget.js?v=3"></script>
+</body>
+</html>
