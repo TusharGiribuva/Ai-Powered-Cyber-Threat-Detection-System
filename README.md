@@ -33,12 +33,37 @@ Create a file named `.env` in the root directory and add your Google API key:
 GOOGLE_API_KEY="your-google-api-key-here"
 ```
 
-### 2. Install Dependencies & Start Server
+### 2. Create Virtual Environment & Install Dependencies
 
-Open your terminal in the root project directory, install dependencies, and start the local web development server:
+It is highly recommended to use a virtual environment to manage project dependencies. Open your terminal in the root project directory and run the following commands based on your Operating System.
 
+**Windows (PowerShell or Command Prompt):**
 ```bash
+# Create a virtual environment
+python -m venv venv
+
+# Activate the virtual environment
+venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Start the local development server
+python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+
+**macOS and Linux (Terminal):**
+```bash
+# Create a virtual environment
+python3 -m venv venv
+
+# Activate the virtual environment
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start the local development server
 python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 
